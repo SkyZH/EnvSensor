@@ -12,7 +12,7 @@
 #define PACK_HEADER_LENGTH 2
 #define PACK_DHT_LENGTH 20
 #define PACK_RAW_LENGTH 20
-#define PACK_PM_LENGTH 12
+#define PACK_PM_LENGTH 6
 
 typedef unsigned char CMD;
 typedef unsigned char SIZE;

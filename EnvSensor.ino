@@ -45,7 +45,6 @@ int readCommand(HardwareSerial *serial) {
   if (serial->available() > 0) {
     return serial->read();
   }
-  delay(1);
   return 0;
 }
 
