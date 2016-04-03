@@ -9,6 +9,7 @@
 #define PACK_HEADER_LENGTH 2
 #define PACK_DHT_LENGTH 20
 #define PACK_RAW_LENGTH 20
+#define PACK_PM_LENGTH 12
 
 typedef unsigned char CMD;
 typedef unsigned char SIZE;
@@ -32,7 +33,15 @@ union DHTPack {
   struct DHTData data;
 } DHTPack;
 
+struct PMData {
+  int pm01, pm25, pm10;
+} PMData;
+
+union PMPack {
+  unsigned char pack[PACK_PM_LENGTH];
+  struct PMData data;
+} PMPack;
+
 struct RawPack {
   unsigned char pack[PACK_RAW_LENGTH];
 } RawPack;
-

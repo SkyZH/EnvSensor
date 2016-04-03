@@ -13,17 +13,13 @@ void setup()
 int getDHTData(struct DHTData *data) {
   float h = dht.readHumidity();
   float t = dht.readTemperature();
-  // Read temperature as Fahrenheit (isFahrenheit = true)
   float f = dht.readTemperature(true);
-
-  // Check if any reads failed and exit early (to try again).
+  
   if (isnan(h) || isnan(t) || isnan(f)) {
     return 0;
   }
-
-  // Compute heat index in Fahrenheit (the default)
   float hif = dht.computeHeatIndex(f, h);
-  // Compute heat index in Celsius (isFahreheit = false)
+  
   float hic = dht.computeHeatIndex(t, h, false);
 
   data->h = h; data->t = t; data->f = f; data->hif = hif; data->hic = hic;
@@ -34,6 +30,7 @@ int readCommand(HardwareSerial *serial) {
   if (serial->available() > 0) {
     return serial->read();
   }
+  delay(500);
   return 0;
 }
 
@@ -52,6 +49,7 @@ int writeCommand(HardwareSerial *serial, CMD cmd, SIZE sz, char* data) {
 
 void loop() {
   union DHTPack dhtPack;
+  union PMPack pmPack;
   struct RawPack rawPack;
   
   CMD cmd = 0;
@@ -65,6 +63,12 @@ void loop() {
       } else {
         writeCommand(&Serial, DATA_CMD_FAILED, PACK_RAW_LENGTH, ((char*)rawPack.pack));
       }
+    } else if(cmd == DATA_CMD_PM) {
+      if(getPMData(&pmPack.data)) {
+        writeCommand(&Serial, cmd, PACK_PM_LENGTH, ((char*)pmPack.pack));
+      } else {
+        writeCommand(&Serial, DATA_CMD_FAILED, PACK_RAW_LENGTH, ((char*)rawPack.pack));
+      }      
     } else if(cmd == DATA_CMD_DEBUG) {
       writeCommand(&Serial, DATA_CMD_DEBUG, PACK_RAW_LENGTH, ((char*)rawPack.pack));
     }
