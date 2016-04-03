@@ -1,3 +1,6 @@
+#ifndef ENVSENSOR_DATA_H
+#define ENVSENSOR_DATA_H
+
 #define DHTTYPE DHT22
 #define DHTPIN 7
 
@@ -45,3 +48,5 @@ union PMPack {
 struct RawPack {
   unsigned char pack[PACK_RAW_LENGTH];
 } RawPack;
+
+#endif
