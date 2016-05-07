@@ -1,24 +1,28 @@
 #include "pm.h"
 
-int pm_transmitPM01(char *buffer){
-    return ((((int)buffer[4]) << 8) + (int)buffer[5]);
+int pm_transmit(byte* buffer, int startpos) {
+    return ((((int)buffer[startpos]) << 8) + (int)buffer[startpos + 1]);
 }
 
-int pm_transmitPM25(char *buffer) {
-    return ((((int)buffer[6]) << 8) + (int)buffer[7]);
+int pm_transmitPM01(byte *buffer){
+    return pm_transmit(buffer, 4);
 }
 
-int pm_transmitPM10(char *buffer) {
-    return ((((int)buffer[8]) << 8) + (int)buffer[9]);
+int pm_transmitPM25(byte *buffer) {
+    return pm_transmit(buffer, 6);
 }
 
-char pm_checkValue(char *buffer, char len) {
-    int recvSum = 0;
+int pm_transmitPM10(byte *buffer) {
+    return pm_transmit(buffer, 8);
+}
+
+char pm_checkValue(byte *buffer, int len) {
+    unsigned long recvSum = 0;
     char i = 0;
     for(i = 0; i < len - 2; i++) {
-        recvSum = recvSum + (int)buffer[i];
+        recvSum = recvSum + (long)buffer[i];
     }
-    if(recvSum == ((((int)buffer[len - 2]) << 8) + (int)buffer[len - 1])) {
+    if(recvSum == ((((long)buffer[len - 2]) << 8) + (long)buffer[len - 1])) {
         return 1;
     }
     return 0;
@@ -29,16 +33,22 @@ void pm_initialize(struct pm_storage* storage, HardwareSerial* serial) {
     storage->serial = serial;
     storage->pm01 = storage->pm25 = storage->pm10 = -1;
 }
-void pm_refresh(struct pm_storage* storage) {
-    if(storage->serial->available()) {
-      storage->serial->readBytes(storage->buffer, PM_BUFFER);
-      if(storage->buffer[0] == 0x42 && storage->buffer[1] == 0x4d) {
-        
-        if(pm_checkValue(storage->buffer, PM_BUFFER)) {
-          storage->pm01 = pm_transmitPM01(storage->buffer);
-          storage->pm25 = pm_transmitPM25(storage->buffer);
-          storage->pm10 = pm_transmitPM10(storage->buffer);
+int pm_refresh(struct pm_storage* storage) {
+  int __length = storage->serial->available();
+  int __i = 0;
+  if(__length >= PM_BUFFER) {
+    storage->serial->readBytes(storage->buffer, min(PM_BUFFER_SIZE, __length));
+    for(__i = 0; __i < PM_BUFFER; __i++) {
+      if(storage->buffer[__i] == 0x42 && storage->buffer[__i + 1] == 0x4d) {
+        if(pm_checkValue(storage->buffer + __i, PM_BUFFER)) {
+          storage->pm01 = pm_transmitPM01(storage->buffer + __i);
+          storage->pm25 = pm_transmitPM25(storage->buffer + __i);
+          storage->pm10 = pm_transmitPM10(storage->buffer + __i);
         }
       }
-    }    
+    }
+    return 0;
+  } else {
+    return 1;
+  }
 }

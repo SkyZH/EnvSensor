@@ -8,6 +8,7 @@
 #define DATA_CMD_PM 65
 #define DATA_CMD_DEBUG 66
 #define DATA_CMD_FAILED 98
+#define DATA_CMD_CLEAR 67
 
 #define PACK_HEADER_LENGTH 2
 #define PACK_DHT_LENGTH 20
